@@ -1,0 +1,42 @@
+def reguser(request):
+    print "In User Registration"
+    if request.method=="POST":
+        nam = request.POST.get("name")
+        email = request.POST.get("email")
+        address = request.POST.get("address")
+        uname = request.POST.get("uname")
+        password = request.POST.get("password")
+        cpassword = request.POST.get("cpassword")
+        if password==cpassword:
+            print "match"
+            print nam, "  ", email, "  ", address, "  ", uname, "  ", password
+            s = User(name=nam, email=email, address=address, username=uname, password=password)
+
+            s.save()
+            return render(request, 'contact.html')
+        else:
+            print "Password Mismatch"
+            return render(request, 'contact.html')
+
+def loginreq(request):
+    if request.method=="POST":
+        print "In login Request"
+        uname = request.POST.get("uname")
+        password = request.POST.get("password")
+        print uname,"  ",password
+        if(uname=="attacker" and password=="attacker"):
+            print "Attacker"
+            return render(request, 'attacker/attackerhome.html')
+        else:
+            print "Checking user"
+            usr = User.objects.all()
+            for i in usr:
+                if uname==i.username and password==i.password:
+                    request.session['uid']=i.id
+                    return render(request,'user/userhome.html')
+    return render(request,'index.html',{})
+
+def logout(request):
+    for s in Session.objects.all():
+        s.delete()
+    return render(request, 'index.html')
