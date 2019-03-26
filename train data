@@ -1,0 +1,188 @@
+def train(request):
+    millis1 = int(round(time.time() * 1000))
+    data=[]
+    print "Starting Training..."
+    print "Reading File..."
+    # f = open("httplog1.txt","r")
+    # l = f.read()
+    # print f.name
+    # k = l.split("\n")
+    # for i in k:
+    #     sp = i.split("  ")
+    #     data.append(sp)
+    #     print sp
+    #     # for j in sp:
+    #         # print j[2]," --- "
+    # print "Obtaining Fake ip's"
+    #
+    # train = pd.read_csv("output.csv", header=0, delimiter=",", quoting=1)
+    # num_reviews = train["tweets"].size
+    #
+    # trainingnumber = train["tweets"].size
+    # data = []
+    # sentiments = []
+    # for i in xrange(0, num_reviews):
+    #     data.append(train["tweets"][i])
+    #     sentiments.append(train["sentiments"][i])
+    #
+    # print "Sentiments and tweets copied"
+    #
+    # from sklearn import svm
+    # from sklearn.preprocessing import label_binarize
+    # Y = label_binarize(sentiments, classes=["Positive", "Negative", "Neutral"])
+    # arr = np.array(data)
+    # arr1 = np.array(data)
+    # print "**********************************************************************************************"
+    # print"Classifier creation"
+    # clf1 = RandomForestClassifier(random_state=1)
+    # clf2 = DecisionTreeClassifier(random_state=1)
+    #
+    # eclf = VotingClassifier(estimators=[('rand', clf1), ('dt', clf2)], voting='soft')
+    # crfcls = Pipeline([
+    #
+    #     ('vectorizer', CountVectorizer(ngram_range=(2, 3))),
+    #     ('tfidf', TfidfTransformer()),
+    #     ('slectbest', SelectKBest(chi2, k=1500)),
+    #
+    #     ('clf', eclf)])
+    #
+    # RandomTrees = Pipeline([
+    #
+    #     ('vectorizer', CountVectorizer(ngram_range=(2, 3))),
+    #     ('tfidf', TfidfTransformer()),
+    #     ('slectbest', SelectKBest(chi2, k=1500)),
+    #     ('clf', RandomForestClassifier(random_state=1))])
+    #
+    # DecisionTree = Pipeline([
+    #
+    #     ('vectorizer', CountVectorizer(ngram_range=(2, 3))),
+    #     ('tfidf', TfidfTransformer()),
+    #     ('slectbest', SelectKBest(chi2, k=1500)),
+    #     ('clf', DecisionTreeClassifier(random_state=1))])
+    #
+    # AdaBoost = Pipeline([
+    #
+    #     ('vectorizer', CountVectorizer(ngram_range=(2, 3))),
+    #     ('tfidf', TfidfTransformer()),
+    #     ('slectbest', SelectKBest(chi2, k=1500)),
+    #     ('clf', AdaBoostClassifier(n_estimators=100))])
+    #
+    # ExtraTree = Pipeline([
+    #
+    #     ('vectorizer', CountVectorizer(ngram_range=(2, 3))),
+    #     ('tfidf', TfidfTransformer()),
+    #     ('slectbest', SelectKBest(chi2, k=1500)),
+    #     ('clf', ExtraTreesClassifier(n_estimators=100))])
+    #
+    # print "completed"
+    #
+    # print "Training the voting..."
+    # ExtraTrees = crfcls.fit(arr, sentiments)
+    # print"completed"
+    # resultOfExtra = ExtraTrees.predict(arr1)
+    # output = pd.DataFrame(data={"tweet": arr1, "sentiment": resultOfExtra})
+    # # Use pandas to write the comma-separated output file
+    # output.to_csv("voting.csv", index=False, quoting=1)
+    #
+    # print "Training the Extra tree ..."
+    # ExtraTrees = ExtraTree.fit(arr, sentiments)
+    # print"completed"
+    # resultOfExtra = ExtraTrees.predict(arr1)
+    # output = pd.DataFrame(data={"tweet": arr1, "sentiment": resultOfExtra})
+    # # Use pandas to write the comma-separated output file
+    # output.to_csv("Extratrees.csv", index=False, quoting=1)
+    #
+    # print "Training the DecisionTree  ..."
+    # ExtraTrees = DecisionTree.fit(arr, sentiments)
+    # print"completed"
+    # resultOfExtra = ExtraTrees.predict(arr1)
+    # print"Writing output to excel Sheet"
+    # output = pd.DataFrame(data={"tweet": arr1, "sentiment": resultOfExtra})
+    # # Use pandas to write the comma-separated output file
+    # output.to_csv("DecisionTree.csv", index=False, quoting=1)
+    #
+    # print "Training the AdaBoost ..."
+    # ExtraTrees = AdaBoost.fit(arr, sentiments)
+    # print"completed"
+    # resultOfExtra = AdaBoost.predict(arr1)
+    # print"Writing output to excel Sheet"
+    # output = pd.DataFrame(data={"tweet": arr1, "sentiment": resultOfExtra})
+    # # Use pandas to write the comma-separated output file
+    # output.to_csv("AdaBoost.csv", index=False, quoting=1)
+    #
+    # print "Training the Randomforest ..."
+    # ExtraTrees = RandomTrees.fit(arr, sentiments)
+    # print"completed"
+    # resultOfExtra = AdaBoost.predict(arr1)
+    # print"Writing output to excel Sheet"
+    # output = pd.DataFrame(data={"tweet": arr1, "sentiment": resultOfExtra})
+    # # Use pandas to write the comma-separated output file
+    # output.to_csv("Randomforest.csv", index=False, quoting=1)
+
+    train = pd.read_csv("output.csv", header=0, delimiter=",", quoting=1)
+    num_reviews = train["tweets"].size
+    # num_reviews = 2000
+    print num_reviews
+    data = []
+    sentiments = []
+    global sentences
+    sentences = []
+
+    for i in xrange(0, num_reviews):
+        sente = re.sub('((www\.[^\s]+)|(https?://[^\s]+))', '', train["tweets"][i])
+        sente = re.sub('@[^\s]+', '', sente)
+        # Remove additional white spaces
+        sente = re.sub('[\s]+', ' ', sente)
+        # Replace #word with word
+        sente = re.sub(r'#([^\s]+)', r'\1', sente)
+        # trim
+        sente = sente.strip('\'"')
+        words_filtereds = [e.lower() for e in sente.split() if len(e) >= 3]
+        sentences.append((words_filtereds, train["sentiments"][i]))
+
+    word_features = get_word_features(get_words_in_sentences(sentences))
+
+    def extract_features(document):
+        document_words = set(document)
+        features = {}
+        for word in word_features:
+            features['contains(%s)' % word] = (word in document_words)
+        return features
+
+    training_set = nltk.classify.util.apply_features(extract_features, sentences)
+    time.sleep(5)
+    global classifier
+    classifier = nltk.NaiveBayesClassifier.train(training_set)
+    f = open("myclass.pickle", "wb")
+    pickle.dump(classifier, f)
+    f.close
+    millis2 = int(round(time.time() * 1000))
+    millis = millis2 - millis1
+    millis = millis/1000
+    print millis
+    f1 = open("TimeNaive.txt","a")
+    f1.write(str(millis)+" "+str(num_reviews)+" \n")
+    f1.close()
+
+    msg = 1
+    return render(request, 'user/train.html', {"mssg": msg})
+
+def svmtrainingdata(request):
+   return render(request, 'index.html')
+
+def svmtesting(request):
+    return render(request, 'index.html')
+
+def testattack(request):
+   return render(request, 'index.html')
+
+def analysis(request):
+    return render(request,'user/analysis.html',{})
+
+def accana(request):
+   return render(request, 'user/analysis.html',{})
+
+def timeana(request):
+   return render(request, 'user/analysis.html',{})
+
+
